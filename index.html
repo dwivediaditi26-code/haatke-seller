@@ -1305,9 +1305,10 @@ function renderAdd(draft=null){
           <span id="photo-count" style="font-size:12px;color:var(--muted)">1 / 5</span>
         </div>
         <div id="thumb-grid" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-          <button class="btn btn-outline btn-sm" id="add-more-btn" onclick="openCamera('extra')">📷 Add more photo</button>
-          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('cam-video').click()">🎥 Add video</button>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-sm" style="background:#EDE7F6;color:#6A1B9A;font-weight:600;border:none" onclick="removeBackgroundAI(0)">✨ Remove BG</button>
+          <button class="btn btn-outline btn-sm" id="add-more-btn" onclick="openCamera('extra')">📷 Add more</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('cam-video').click()">🎥 Video</button>
         </div>
         <div id="video-preview" style="display:none;margin-top:8px">
           <video id="prod-video" controls style="width:100%;border-radius:8px;max-height:180px"></video>
@@ -1347,15 +1348,15 @@ function renderAdd(draft=null){
         </div>
         <div class="fg"><label class="fl">Description</label><textarea class="fta" id="a-desc" placeholder="Describe the product...">${draft?.desc||''}</textarea></div>
 
-        <!-- Real AI settings -->
+        <!-- Background removal settings -->
         <div style="background:#F3E5F5;border-radius:8px;padding:12px 14px;margin-bottom:16px">
-          <div style="font-size:12px;font-weight:600;color:#6A1B9A;margin-bottom:6px">🤖 Real AI background removal</div>
-          <div style="font-size:12px;color:#7B1FA2;margin-bottom:8px">Paste your remove.bg API key to get real AI editing (not simulation)</div>
+          <div style="font-size:12px;font-weight:600;color:#6A1B9A;margin-bottom:4px">✨ Background Removal (works without key!)</div>
+          <div style="font-size:12px;color:#7B1FA2;margin-bottom:8px">Free AI runs in your browser — no key needed. Tap <strong>✨ Remove BG</strong> after adding a photo. Or add a remove.bg key for faster + higher quality results.</div>
           <div style="display:flex;gap:8px">
-            <input class="fi" id="removebg-key" placeholder="remove.bg API key" style="font-size:12px" value="${loadData('removebg_key','')}">
-            <button class="btn btn-sm" style="background:#6A1B9A;color:#fff;white-space:nowrap" onclick="saveRemoveBgKey()">Save key</button>
+            <input class="fi" id="removebg-key" placeholder="remove.bg API key (optional)" style="font-size:12px" value="${loadData('removebg_key','')}">
+            <button class="btn btn-sm" style="background:#6A1B9A;color:#fff;white-space:nowrap" onclick="saveRemoveBgKey()">Save</button>
           </div>
-          <div style="font-size:11px;color:#9C27B0;margin-top:5px">Free at remove.bg — 50 free credits/month</div>
+          <div style="font-size:11px;color:#9C27B0;margin-top:5px">Free key at remove.bg — 50 credits/month</div>
         </div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
@@ -1647,6 +1648,87 @@ function saveRemoveBgKey(){
   const key=document.getElementById('removebg-key')?.value.trim();
   saveData('removebg_key',key||'');
   toast(key?'✓ remove.bg key saved — real AI enabled!':'remove.bg key cleared.');
+}
+
+// ── Background Removal (free client-side AI + optional remove.bg API) ──
+let _bgRemoveModule = null; // cached after first load
+
+async function removeBackgroundAI(idx){
+  idx = (idx === undefined) ? 0 : idx;
+  const src = productPhotos[idx];
+  if(!src){ toast('📷 Take a photo first.'); return; }
+
+  // Dim the thumb while processing
+  const thumbEl = document.getElementById('thumb-grid')?.children[idx];
+  if(thumbEl) thumbEl.style.opacity = '0.4';
+
+  const removebgKey = loadData('removebg_key','');
+  let resultBase64;
+  try {
+    if(removebgKey){
+      // ── remove.bg API ──
+      toast('🤖 remove.bg: removing background...');
+      const blob = await (await fetch(src)).blob();
+      const form = new FormData();
+      form.append('image_file', blob, 'product.jpg');
+      form.append('size', 'auto');
+      const res = await fetch('https://api.remove.bg/v1.0/removebg',{
+        method:'POST', headers:{'X-Api-Key':removebgKey}, body:form
+      });
+      if(!res.ok){ toast('❌ remove.bg error: '+res.statusText); if(thumbEl)thumbEl.style.opacity='1'; return; }
+      resultBase64 = await _blobToBase64(await res.blob());
+    } else {
+      // ── Free in-browser AI (@imgly/background-removal) ──
+      if(!_bgRemoveModule){
+        toast('⏳ Loading AI model… takes ~10–20s the first time (then cached)');
+      }
+      if(!_bgRemoveModule){
+        _bgRemoveModule = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/web/index.mjs');
+      }
+      toast('✨ AI is removing the background…');
+      const blob = await (await fetch(src)).blob();
+      const resultBlob = await _bgRemoveModule.removeBackground(blob, {
+        publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/web/',
+        debug: false,
+      });
+      resultBase64 = await _blobToBase64(resultBlob);
+    }
+
+    // Composite transparent PNG onto white background → JPEG
+    productPhotos[idx] = await _compositeOnWhite(resultBase64);
+    renderThumbs();
+    toast('✅ Background removed! Clean white product photo ready.');
+  } catch(err){
+    console.error('BG removal failed:', err);
+    toast('❌ Background removal failed. Check your internet connection.');
+    if(thumbEl) thumbEl.style.opacity = '1';
+  }
+}
+
+function _blobToBase64(blob){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+function _compositeOnWhite(base64){
+  return new Promise((res,rej)=>{
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0);
+      res(c.toDataURL('image/jpeg', 0.92));
+    };
+    img.onerror = rej;
+    img.src = base64;
+  });
 }
 
 function submitProduct(){
