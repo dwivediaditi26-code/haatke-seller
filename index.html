@@ -1650,24 +1650,23 @@ function saveRemoveBgKey(){
   toast(key?'✓ remove.bg key saved — real AI enabled!':'remove.bg key cleared.');
 }
 
-// ── Background Removal (free client-side AI + optional remove.bg API) ──
-let _bgRemoveModule = null; // cached after first load
+// ── Background Removal ──
+// Free mode: canvas flood-fill (works offline, no API key needed)
+// Premium mode: remove.bg API (enter key in the form for better quality)
 
 async function removeBackgroundAI(idx){
   idx = (idx === undefined) ? 0 : idx;
   const src = productPhotos[idx];
   if(!src){ toast('📷 Take a photo first.'); return; }
 
-  // Dim the thumb while processing
   const thumbEl = document.getElementById('thumb-grid')?.children[idx];
   if(thumbEl) thumbEl.style.opacity = '0.4';
 
   const removebgKey = loadData('removebg_key','');
-  let resultBase64;
   try {
     if(removebgKey){
-      // ── remove.bg API ──
-      toast('🤖 remove.bg: removing background...');
+      // ── remove.bg API (high quality) ──
+      toast('🤖 remove.bg: removing background…');
       const blob = await (await fetch(src)).blob();
       const form = new FormData();
       form.append('image_file', blob, 'product.jpg');
@@ -1675,42 +1674,88 @@ async function removeBackgroundAI(idx){
       const res = await fetch('https://api.remove.bg/v1.0/removebg',{
         method:'POST', headers:{'X-Api-Key':removebgKey}, body:form
       });
-      if(!res.ok){ toast('❌ remove.bg error: '+res.statusText); if(thumbEl)thumbEl.style.opacity='1'; return; }
-      resultBase64 = await _blobToBase64(await res.blob());
+      if(!res.ok){
+        toast('❌ remove.bg error '+res.status+': '+res.statusText);
+        if(thumbEl) thumbEl.style.opacity='1'; return;
+      }
+      const rb = await res.blob();
+      const b64 = await _blobToBase64(rb);
+      productPhotos[idx] = await _compositeOnWhite(b64);
+      renderThumbs();
+      toast('✅ Background removed with remove.bg!');
     } else {
-      // ── Free in-browser AI (@imgly/background-removal) ──
-      if(!_bgRemoveModule){
-        toast('⏳ Loading AI model… takes ~10–20s the first time (then cached)');
-      }
-      if(!_bgRemoveModule){
-        _bgRemoveModule = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/web/index.mjs');
-      }
-      toast('✨ AI is removing the background…');
-      const blob = await (await fetch(src)).blob();
-      const resultBlob = await _bgRemoveModule.removeBackground(blob, {
-        publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/web/',
-        debug: false,
-      });
-      resultBase64 = await _blobToBase64(resultBlob);
+      // ── Free canvas flood-fill (works offline, instant) ──
+      toast('✨ Removing background…');
+      productPhotos[idx] = await _canvasRemoveBg(src);
+      renderThumbs();
+      toast('✅ Done! (Add remove.bg key in the form below for AI-quality results)');
     }
-
-    // Composite transparent PNG onto white background → JPEG
-    productPhotos[idx] = await _compositeOnWhite(resultBase64);
-    renderThumbs();
-    toast('✅ Background removed! Clean white product photo ready.');
   } catch(err){
     console.error('BG removal failed:', err);
-    toast('❌ Background removal failed. Check your internet connection.');
+    toast('❌ Failed: ' + (err.message||String(err)).substring(0,60));
     if(thumbEl) thumbEl.style.opacity = '1';
   }
 }
 
+// Canvas flood-fill background removal — samples edges to find bg color,
+// then BFS-fills from all edges outward, making matched pixels transparent.
+function _canvasRemoveBg(base64){
+  return new Promise((res,rej)=>{
+    const img = new Image();
+    img.onload = () => {
+      const w = img.width, h = img.height;
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      const ctx = c.getContext('2d'); ctx.drawImage(img,0,0);
+      const data = ctx.getImageData(0,0,w,h); const px = data.data;
+
+      // Sample border pixels to estimate background color
+      let rS=0,gS=0,bS=0,n=0;
+      const step = Math.max(1, Math.floor(Math.min(w,h)/30));
+      for(let x=0;x<w;x+=step){ addSample(x,0); addSample(x,h-1); }
+      for(let y=0;y<h;y+=step){ addSample(0,y); addSample(w-1,y); }
+      function addSample(x,y){ const i=(y*w+x)*4; rS+=px[i];gS+=px[i+1];bS+=px[i+2];n++; }
+      const bgR=rS/n, bgG=gS/n, bgB=bS/n;
+
+      // BFS from all edge pixels
+      const visited = new Uint8Array(w*h);
+      const stack = [];
+      const thresh = 55; // color-distance tolerance (0=exact, 100=loose)
+      const isClose = (i) => {
+        const dr=px[i]-bgR, dg=px[i+1]-bgG, db=px[i+2]-bgB;
+        return Math.sqrt(dr*dr+dg*dg+db*db) < thresh;
+      };
+      for(let x=0;x<w;x++){ stack.push(x); stack.push((h-1)*w+x); }
+      for(let y=1;y<h-1;y++){ stack.push(y*w); stack.push(y*w+(w-1)); }
+
+      while(stack.length){
+        const pos = stack.pop();
+        if(pos<0||pos>=w*h||visited[pos]) continue;
+        visited[pos]=1;
+        if(isClose(pos*4)){
+          px[pos*4+3]=0; // make transparent
+          const x=pos%w, y=Math.floor(pos/w);
+          if(x>0)   stack.push(pos-1);
+          if(x<w-1) stack.push(pos+1);
+          if(y>0)   stack.push(pos-w);
+          if(y<h-1) stack.push(pos+w);
+        }
+      }
+      ctx.putImageData(data,0,0);
+
+      // Composite transparent result onto white
+      const out = document.createElement('canvas'); out.width=w; out.height=h;
+      const octx = out.getContext('2d');
+      octx.fillStyle='#ffffff'; octx.fillRect(0,0,w,h); octx.drawImage(c,0,0);
+      res(out.toDataURL('image/jpeg',0.92));
+    };
+    img.onerror = rej;
+    img.src = base64;
+  });
+}
+
 function _blobToBase64(blob){
   return new Promise((res,rej)=>{
-    const r = new FileReader();
-    r.onload = e => res(e.target.result);
-    r.onerror = rej;
-    r.readAsDataURL(blob);
+    const r = new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(blob);
   });
 }
 
@@ -1718,16 +1763,12 @@ function _compositeOnWhite(base64){
   return new Promise((res,rej)=>{
     const img = new Image();
     img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = img.width; c.height = img.height;
+      const c = document.createElement('canvas'); c.width=img.width; c.height=img.height;
       const ctx = c.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, c.width, c.height);
-      ctx.drawImage(img, 0, 0);
-      res(c.toDataURL('image/jpeg', 0.92));
+      ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,c.width,c.height); ctx.drawImage(img,0,0);
+      res(c.toDataURL('image/jpeg',0.92));
     };
-    img.onerror = rej;
-    img.src = base64;
+    img.onerror=rej; img.src=base64;
   });
 }
 
