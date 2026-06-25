@@ -138,11 +138,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @keyframes pulse{from{opacity:.3;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
 /* RESPONSIVE */
 @media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr;}.earn-grid{grid-template-columns:1fr;}.info-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}}
-@media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}.content{padding:14px;}.bnav{display:flex!important;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:100;padding:8px 0 12px;}.main{padding-bottom:70px;}}
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .main{margin-left:0;}
+  .content{padding:12px;}
+  .bnav{display:flex!important;align-items:center;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom));}
+  .main{padding-bottom:80px;}
+  .topbar{padding:10px 14px;}
+  .topbar h2{font-size:16px;font-weight:600;}
+  #today-date,#notif-btn,#topbar-add-btn{display:none!important;}
+  #shop-toggle-btn{font-size:11px!important;padding:5px 11px!important;border-radius:20px!important;font-weight:600!important;}
+  .stats-grid{grid-template-columns:1fr 1fr!important;}
+  .prod-grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr));}
+  .toast{bottom:90px;right:12px;left:12px;max-width:none;}
+  .form-row{grid-template-columns:1fr;}
+  .info-grid{grid-template-columns:1fr;}
+  .earn-grid{grid-template-columns:1fr;}
+}
 .bnav{display:none;}
-.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:9px;color:var(--muted);cursor:pointer;border:none;background:none;padding:4px 0;}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--muted);cursor:pointer;border:none;background:none;padding:4px 2px;min-width:0;}
 .bni.active{color:var(--red);}
-.bni-ic{font-size:18px;}
+.bni-ic{font-size:20px;line-height:1.1;}
+.bni-fab{display:flex;width:42px;height:42px;border-radius:50%;background:var(--red);align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 10px rgba(198,40,40,.35);margin-bottom:1px;}
 /* EMPTY */
 .empty{text-align:center;padding:50px 20px;color:var(--muted);}
 .empty .ei{font-size:48px;margin-bottom:12px;}
@@ -179,7 +196,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <span style="font-size:13px;color:var(--muted)" id="today-date"></span>
       <button id="notif-btn" class="btn btn-ghost btn-sm" onclick="requestNotifPerm()" title="Enable order notifications">🔔 Notify me</button>
       <button id="shop-toggle-btn" onclick="toggleShop()" class="btn btn-sm" style="font-weight:600"></button>
-      <button class="btn btn-primary btn-sm" onclick="go('add')">+ Add Product</button>
+      <button id="topbar-add-btn" class="btn btn-primary btn-sm" onclick="go('add')">+ Add Product</button>
     </div>
   </div>
   <div class="content" id="content"></div>
@@ -372,17 +389,18 @@ function isMedical(){ return shop.type==='medical'; }
 function renderBnav(){
   const bnav = document.getElementById('bnav');
   if(!bnav) return;
-  const pendRx = prescriptions.filter(r=>r.status==='pending').length;
-  const mid5 = isMedical()
-    ? `<button class="bni" onclick="go('prescriptions')"><span class="bni-ic">💊</span>Rx${pendRx?` <span style="background:var(--red);color:#fff;border-radius:8px;font-size:8px;padding:1px 4px">${pendRx}</span>`:''}</button>`
-    : `<button class="bni" onclick="go('earnings')"><span class="bni-ic">💰</span>Earn</button>`;
+  const newOrders = orders.filter(o=>o.status==='new').length;
   bnav.innerHTML = `
     <button class="bni" onclick="go('dashboard')"><span class="bni-ic">🏠</span>Home</button>
-    <button class="bni" onclick="go('orders')"><span class="bni-ic">📦</span>Orders</button>
+    <button class="bni" onclick="go('orders')" style="position:relative">
+      <span style="position:relative;display:inline-block;line-height:1">
+        <span class="bni-ic">📦</span>
+        ${newOrders?`<span style="position:absolute;top:-2px;right:-8px;background:var(--red);color:#fff;border-radius:8px;font-size:8px;padding:0 4px;line-height:16px">${newOrders}</span>`:''}
+      </span>
+      Orders
+    </button>
+    <button class="bni" onclick="go('add')"><span class="bni-fab">➕</span><span style="color:var(--red);font-weight:600;font-size:10px">Add</span></button>
     <button class="bni" onclick="go('products')"><span class="bni-ic">👕</span>Products</button>
-    <button class="bni" onclick="go('add')"><span class="bni-ic">➕</span>Add</button>
-    ${mid5}
-    <button class="bni" onclick="go('delivery')"><span class="bni-ic">🛵</span>Delivery</button>
     <button class="bni" onclick="go('profile')"><span class="bni-ic">🏪</span>Shop</button>
   `;
   // re-apply active state
