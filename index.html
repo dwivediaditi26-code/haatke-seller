@@ -167,6 +167,48 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* EMPTY */
 .empty{text-align:center;padding:50px 20px;color:var(--muted);}
 .empty .ei{font-size:48px;margin-bottom:12px;}
+/* ── Photo Studio ─────────────────────────────────── */
+#ps-wrap{background:#000;display:flex;flex-direction:column;height:100%;width:100%;max-width:600px;margin:auto;position:relative}
+.ps-tb{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#000;flex-shrink:0;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.ps-back{background:none;border:none;color:#fff;font-size:26px;cursor:pointer;padding:2px 8px;line-height:1}
+.ps-use{background:var(--red);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer}
+.ps-ca{flex:1;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;min-height:0}
+.ps-pn{background:#1c1c1e;border-top:0.5px solid #333;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+.ps-tabs{display:flex;border-bottom:0.5px solid #333}
+.ps-tab{flex:1;padding:11px 4px;text-align:center;font-size:12px;font-weight:500;color:#8e8e93;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent}
+.ps-tab.on{color:var(--red);border-bottom-color:var(--red)}
+.ps-body{padding:14px 16px 16px;overflow-y:auto;max-height:200px}
+.ps-body::-webkit-scrollbar{display:none}
+.ps-rmbtn{width:100%;background:linear-gradient(135deg,#6a1b9a,var(--red));color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
+.ps-rmbtn:disabled{opacity:.4;cursor:not-allowed}
+.ps-bg-row{display:flex;gap:10px;flex-wrap:wrap}
+.ps-chip{cursor:pointer;text-align:center}
+.ps-ring{width:46px;height:46px;border-radius:11px;border:2px solid transparent;padding:2px}
+.ps-ring.on{border-color:var(--red)}
+.ps-sw{width:100%;height:100%;border-radius:9px;border:0.5px solid rgba(255,255,255,.1)}
+.ps-clbl{font-size:9px;color:#8e8e93;margin-top:2px}
+.ps-presets{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
+.ps-presets::-webkit-scrollbar{display:none}
+.ps-psbtn{flex-shrink:0;border:1px solid #444;border-radius:8px;background:#2c2c2e;color:#fff;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.ps-psbtn.on{border-color:var(--red);color:var(--red);background:rgba(198,40,40,.1)}
+.ps-sr{margin-bottom:8px}
+.ps-sr-head{display:flex;justify-content:space-between;margin-bottom:3px}
+.ps-sr-lbl{font-size:12px;color:#8e8e93}
+.ps-sr-val{font-size:12px;color:#fff;font-weight:600;min-width:26px;text-align:right}
+.ps-sl{width:100%;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:#3a3a3c;outline:none;display:block}
+.ps-sl::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--red);cursor:pointer;border:2.5px solid #fff}
+.ps-loading{display:none;position:absolute;inset:0;background:rgba(0,0,0,.78);align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:50}
+.ps-spinner{width:38px;height:38px;border:3px solid #333;border-top-color:var(--red);border-radius:50%;animation:psspin .75s linear infinite}
+@keyframes psspin{to{transform:rotate(360deg)}}
+.ps-toolrow{display:flex;gap:6px;margin-bottom:10px}
+.ps-toolbtn{flex:1;background:#2c2c2e;border:1px solid #444;border-radius:10px;color:#ccc;font-size:12px;font-weight:500;padding:8px 4px;cursor:pointer;text-align:center;transition:all .12s}
+.ps-toolbtn.on{background:rgba(198,40,40,.12);border-color:var(--red);color:var(--red)}
+.ps-restore{background:none;border:1px solid #444;border-radius:10px;color:#8e8e93;font-size:12px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.ps-hint{display:none;position:absolute;top:10px;left:0;right:0;text-align:center;pointer-events:none;z-index:5}
+.ps-hint span{background:rgba(0,0,0,.72);color:#fff;font-size:12px;padding:5px 16px;border-radius:20px}
+.ps-ai-row{margin-top:14px;border-top:.5px solid #333;padding-top:12px}
+.ps-ai-inp{width:100%;background:#2c2c2e;border:1px solid #444;border-radius:8px;padding:8px 10px;color:#fff;font-size:12px;outline:none;margin-bottom:6px}
+.ps-ai-btn{background:#e65100;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -261,6 +303,116 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <button id="cam-flip-btn" onclick="flipCamera()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer" title="Flip camera">🔄</button>
       <button onclick="capturePhoto()" style="width:68px;height:68px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,.6);cursor:pointer;font-size:28px" title="Take photo">📸</button>
       <button onclick="closeCameraModal();document.getElementById('cam-input').click()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer" title="Pick from gallery">🖼️</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTO STUDIO MODAL -->
+<div class="modal-bg" id="photo-studio-modal" style="padding:0;align-items:stretch;justify-content:stretch">
+  <div id="ps-wrap">
+    <div class="ps-tb">
+      <button class="ps-back" onclick="closePsModal()">‹</button>
+      <span style="font-size:15px;font-weight:600;color:#fff">✨ Photo Studio</span>
+      <button class="ps-use" onclick="applyPsPhoto()">✓ Use Photo</button>
+    </div>
+    <div class="ps-ca" style="position:relative">
+      <canvas id="ps-canvas" style="touch-action:none;display:block"></canvas>
+      <div class="ps-hint" id="ps-hint"><span id="ps-hint-txt"></span></div>
+    </div>
+    <div class="ps-pn">
+      <div class="ps-tabs">
+        <button class="ps-tab on" id="ps-t-bg" onclick="psShowTab('bg')">Background</button>
+        <button class="ps-tab" id="ps-t-enh" onclick="psShowTab('enh')">Enhance</button>
+      </div>
+      <!-- Background tab -->
+      <div id="ps-tab-bg" class="ps-body">
+
+        <!-- ① Auto remove -->
+        <button class="ps-rmbtn" id="ps-rm-btn" onclick="psRemoveBg()">✨ Auto Remove BG</button>
+
+        <!-- ② Manual tools -->
+        <div class="ps-toolrow">
+          <button class="ps-toolbtn" id="ps-tool-wand" onclick="psSetTool('wand')">👆 Magic Wand</button>
+          <button class="ps-toolbtn" id="ps-tool-brush" onclick="psSetTool('brush')">🖌️ Brush Erase</button>
+          <button class="ps-restore" onclick="psRestoreAll()">↩️ Restore</button>
+        </div>
+
+        <!-- Brush size (visible only in brush mode) -->
+        <div id="ps-brush-row" style="display:none;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#8e8e93;margin-bottom:3px">
+            <span>Brush size</span><span id="ps-brush-val">25</span>px
+          </div>
+          <input type="range" class="ps-sl" id="ps-brush-size" min="10" max="80" value="25" step="5"
+            oninput="psBrushSz=+this.value;document.getElementById('ps-brush-val').textContent=this.value">
+        </div>
+
+        <!-- ③ Background picker -->
+        <div style="font-size:10px;color:#8e8e93;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Background</div>
+        <div class="ps-bg-row">
+          <div class="ps-chip" onclick="psBgSet('orig')">
+            <div class="ps-ring on" id="ps-cr-orig"><div class="ps-sw" style="background:linear-gradient(135deg,#555 25%,#333 25%,#333 50%,#555 50%,#555 75%,#333 75%);background-size:10px 10px"></div></div>
+            <div class="ps-clbl">Original</div>
+          </div>
+          <div class="ps-chip" onclick="psBgSet('white')">
+            <div class="ps-ring" id="ps-cr-white"><div class="ps-sw" style="background:#fff"></div></div>
+            <div class="ps-clbl">White</div>
+          </div>
+          <div class="ps-chip" onclick="psBgSet('light')">
+            <div class="ps-ring" id="ps-cr-light"><div class="ps-sw" style="background:#f0f0f0"></div></div>
+            <div class="ps-clbl">Light</div>
+          </div>
+          <div class="ps-chip" onclick="psBgSet('gray')">
+            <div class="ps-ring" id="ps-cr-gray"><div class="ps-sw" style="background:#aaa"></div></div>
+            <div class="ps-clbl">Gray</div>
+          </div>
+          <div class="ps-chip" onclick="psBgSet('grad')">
+            <div class="ps-ring" id="ps-cr-grad"><div class="ps-sw" style="background:radial-gradient(ellipse at center,#fff 0%,#ccc 100%)"></div></div>
+            <div class="ps-clbl">Studio</div>
+          </div>
+          <div class="ps-chip" onclick="psBgSet('dark')">
+            <div class="ps-ring" id="ps-cr-dark"><div class="ps-sw" style="background:#1a1a1a"></div></div>
+            <div class="ps-clbl">Dark</div>
+          </div>
+          <div class="ps-chip" onclick="document.getElementById('ps-color-pick').click()" style="position:relative">
+            <div class="ps-ring" id="ps-cr-custom"><div class="ps-sw" id="ps-custom-sw" style="background:#FF6B6B"></div></div>
+            <div class="ps-clbl">Custom</div>
+            <input id="ps-color-pick" type="color" value="#FF6B6B" style="position:absolute;opacity:0;width:0;height:0" onchange="psBgColorSet(this.value)">
+          </div>
+        </div>
+
+        <!-- ④ AI removal (HuggingFace — free tier) -->
+        <div class="ps-ai-row">
+          <div style="font-size:11px;color:#8e8e93;margin-bottom:6px">🤖 AI Removal — better quality (free tier at huggingface.co)</div>
+          <input class="ps-ai-inp" id="ps-hf-key" placeholder="Paste HuggingFace token: hf_xxxxxxxx">
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="ps-ai-btn" onclick="psHFRemoveBg()">🤖 AI Remove BG</button>
+            <span style="font-size:10px;color:#555;line-height:1.3">Free 1000 calls/day<br>~₹0.08 after free tier</span>
+          </div>
+        </div>
+
+      </div>
+      <!-- Enhance tab -->
+      <div id="ps-tab-enh" class="ps-body" style="display:none">
+        <div class="ps-presets">
+          <button class="ps-psbtn" onclick="psPreset('auto',this)">⚡ Auto</button>
+          <button class="ps-psbtn" onclick="psPreset('studio',this)">🏢 Studio</button>
+          <button class="ps-psbtn" onclick="psPreset('warm',this)">🌅 Warm</button>
+          <button class="ps-psbtn" onclick="psPreset('vivid',this)">🌈 Vivid</button>
+          <button class="ps-psbtn" onclick="psReset(true)">↺ Reset</button>
+        </div>
+        <div class="ps-sr"><div class="ps-sr-head"><span class="ps-sr-lbl">Brightness</span><span class="ps-sr-val" id="psv-brt">0</span></div><input type="range" class="ps-sl" id="pss-brt" min="-100" max="100" value="0" step="1" oninput="psOnSlider()"></div>
+        <div class="ps-sr"><div class="ps-sr-head"><span class="ps-sr-lbl">Contrast</span><span class="ps-sr-val" id="psv-ctr">0</span></div><input type="range" class="ps-sl" id="pss-ctr" min="-100" max="100" value="0" step="1" oninput="psOnSlider()"></div>
+        <div class="ps-sr"><div class="ps-sr-head"><span class="ps-sr-lbl">Saturation</span><span class="ps-sr-val" id="psv-sat">0</span></div><input type="range" class="ps-sl" id="pss-sat" min="-100" max="100" value="0" step="1" oninput="psOnSlider()"></div>
+        <div class="ps-sr"><div class="ps-sr-head"><span class="ps-sr-lbl">Warmth</span><span class="ps-sr-val" id="psv-wrm">0</span></div><input type="range" class="ps-sl" id="pss-wrm" min="-100" max="100" value="0" step="1" oninput="psOnSlider()"></div>
+        <div class="ps-sr"><div class="ps-sr-head"><span class="ps-sr-lbl">Sharpness</span><span class="ps-sr-val" id="psv-shp">0</span></div><input type="range" class="ps-sl" id="pss-shp" min="0" max="100" value="0" step="1" oninput="psOnSlider()"></div>
+        <div class="ps-sr"><div class="ps-sr-head"><span class="ps-sr-lbl">Highlights</span><span class="ps-sr-val" id="psv-hi">0</span></div><input type="range" class="ps-sl" id="pss-hi" min="-100" max="100" value="0" step="1" oninput="psOnSlider()"></div>
+        <div class="ps-sr"><div class="ps-sr-head"><span class="ps-sr-lbl">Shadows</span><span class="ps-sr-val" id="psv-sh">0</span></div><input type="range" class="ps-sl" id="pss-sh" min="-100" max="100" value="0" step="1" oninput="psOnSlider()"></div>
+      </div>
+    </div>
+    <!-- Loading overlay inside studio -->
+    <div class="ps-loading" id="ps-loading">
+      <div class="ps-spinner"></div>
+      <div style="font-size:14px;color:#8e8e93" id="ps-loading-txt">Removing background…</div>
     </div>
   </div>
 </div>
@@ -1310,7 +1462,7 @@ function renderAdd(draft=null){
         </div>
         <div id="thumb-grid" style="display:flex;gap:8px;flex-wrap:wrap"></div>
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-          <button class="btn btn-sm" style="background:#EDE7F6;color:#6A1B9A;font-weight:600;border:none" onclick="removeBackgroundAI(0)">✨ Remove BG</button>
+          <button class="btn btn-sm" style="background:linear-gradient(135deg,#6a1b9a,#C62828);color:#fff;font-weight:700;border:none" onclick="openPsModal(0)">✨ Edit Photo</button>
           <button class="btn btn-outline btn-sm" id="add-more-btn" onclick="openCamera('extra')">📷 Add more</button>
           <button class="btn btn-ghost btn-sm" onclick="document.getElementById('cam-video').click()">🎥 Video</button>
         </div>
@@ -1406,8 +1558,9 @@ function renderThumbs(){
   const grid=document.getElementById('thumb-grid');if(!grid)return;
   grid.innerHTML=productPhotos.map((src,i)=>`
     <div style="position:relative;width:70px;height:70px;flex-shrink:0">
-      <img src="${src}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:2px solid ${i===0?'var(--red)':'var(--border)'}">
-      ${i===0?`<div style="position:absolute;bottom:2px;left:2px;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">Main</div>`:''}
+      <img src="${src}" onclick="openPsModal(${i})" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:2px solid ${i===0?'var(--red)':'var(--border)'};cursor:pointer" title="Tap to edit in Photo Studio">
+      ${i===0?`<div style="position:absolute;bottom:2px;left:2px;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;pointer-events:none">Main</div>`:''}
+      <div style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,.55);color:#fff;font-size:9px;padding:1px 4px;border-radius:3px;pointer-events:none">✏️</div>
       <button onclick="removePhoto(${i})" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:#d32f2f;color:#fff;border:none;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>`).join('');
   const count=document.getElementById('photo-count');if(count)count.textContent=productPhotos.length+' / 5';
@@ -1774,6 +1927,354 @@ function _compositeOnWhite(base64){
     };
     img.onerror=rej; img.src=base64;
   });
+}
+
+// ═══════════════════════════════════════════════════════
+// PHOTO STUDIO — inline product photo editor
+// ═══════════════════════════════════════════════════════
+let psIdx=0, psImg=null, psW=0, psH=0;
+let psMask=null, psBg='orig', psBgClr='#FF6B6B', psRaf=null;
+let psCurTool='none', psBrushSz=25, psPointerDown=false, psEventsReady=false;
+const psA={brt:0,ctr:0,sat:0,wrm:0,shp:0,hi:0,sh:0};
+
+function openPsModal(idx){
+  const src=productPhotos[idx];
+  if(!src){toast('📷 No photo to edit');return;}
+  psIdx=idx; psMask=null; psBg='orig'; psCurTool='none'; psPointerDown=false;
+  psReset(false); psActiveBg('orig');
+  psShowTab('bg');
+  // Reset tool UI
+  document.getElementById('ps-tool-wand')?.classList.remove('on');
+  document.getElementById('ps-tool-brush')?.classList.remove('on');
+  document.getElementById('ps-brush-row').style.display='none';
+  document.getElementById('ps-hint').style.display='none';
+  // Load saved HF key
+  const savedHF=loadData('hf_key','');
+  if(savedHF)document.getElementById('ps-hf-key').value=savedHF;
+  const img=new Image();
+  img.onload=()=>{
+    psImg=img; psW=img.naturalWidth; psH=img.naturalHeight;
+    document.getElementById('photo-studio-modal').classList.add('open');
+    if(!psEventsReady){psSetupEvents();psEventsReady=true;}
+    setTimeout(()=>psRender(),60);
+  };
+  img.src=src;
+}
+
+function closePsModal(){
+  document.getElementById('photo-studio-modal').classList.remove('open');
+  psImg=null; psMask=null;
+}
+
+function psShowTab(key){
+  document.getElementById('ps-tab-bg').style.display=key==='bg'?'block':'none';
+  document.getElementById('ps-tab-enh').style.display=key==='enh'?'block':'none';
+  document.getElementById('ps-t-bg').classList.toggle('on',key==='bg');
+  document.getElementById('ps-t-enh').classList.toggle('on',key==='enh');
+}
+
+function psBgSet(key){
+  psBg=key; psActiveBg(key); psSchedRender();
+}
+
+function psActiveBg(key){
+  ['orig','white','light','gray','grad','dark','custom'].forEach(k=>{
+    document.getElementById('ps-cr-'+k)?.classList.remove('on');
+  });
+  document.getElementById('ps-cr-'+key)?.classList.add('on');
+}
+
+function psBgColorSet(hex){
+  psBgClr=hex;
+  document.getElementById('ps-custom-sw').style.background=hex;
+  psBg='custom'; psActiveBg('custom'); psSchedRender();
+}
+
+async function psRemoveBg(){
+  if(!psImg)return;
+  const btn=document.getElementById('ps-rm-btn');
+  btn.disabled=true; psShowLoading('✨ Removing background…');
+  await new Promise(r=>setTimeout(r,60));
+  try{
+    psMask=await psDoRemoveBg(psImg,psW,psH);
+    if(psBg==='orig'){psBg='white';psActiveBg('white');}
+    psRender(); toast('✅ Background removed!');
+  }catch(e){toast('❌ '+(e.message||'Failed'));}
+  psHideLoading(); btn.disabled=false;
+}
+
+function psDoRemoveBg(img,W,H){
+  return new Promise((resolve)=>{
+    const c=document.createElement('canvas'); c.width=W; c.height=H;
+    const ctx=c.getContext('2d',{willReadFrequently:true}); ctx.drawImage(img,0,0,W,H);
+    const imd=ctx.getImageData(0,0,W,H); const px=imd.data;
+    let rS=0,gS=0,bS=0,n=0;
+    const step=Math.max(1,Math.floor(Math.min(W,H)/40));
+    function smp(x,y){const i=(y*W+x)*4;rS+=px[i];gS+=px[i+1];bS+=px[i+2];n++;}
+    for(let x=0;x<W;x+=step){smp(x,0);smp(x,H-1);}
+    for(let y=step;y<H-step;y+=step){smp(0,y);smp(W-1,y);}
+    const bgR=rS/n,bgG=gS/n,bgB=bS/n;
+    const visited=new Uint8Array(W*H); const stack=[]; const T=60;
+    function bgLike(p){const i=p*4;const dr=px[i]-bgR,dg=px[i+1]-bgG,db=px[i+2]-bgB;return dr*dr+dg*dg+db*db<T*T;}
+    function push(x,y){if(x<0||x>=W||y<0||y>=H)return;const p=y*W+x;if(visited[p])return;visited[p]=1;if(!bgLike(p))return;stack.push(p);}
+    for(let x=0;x<W;x++){push(x,0);push(x,H-1);}
+    for(let y=1;y<H-1;y++){push(0,y);push(W-1,y);}
+    function chunk(){
+      let done=0;
+      while(stack.length&&done<60000){const pos=stack.pop();px[pos*4+3]=0;const x=pos%W,y=(pos/W)|0;push(x-1,y);push(x+1,y);push(x,y-1);push(x,y+1);done++;}
+      if(stack.length){setTimeout(chunk,0);}
+      else{ctx.putImageData(imd,0,0);resolve(imd);}
+    }
+    chunk();
+  });
+}
+
+function psOnSlider(){
+  ['brt','ctr','sat','wrm','shp','hi','sh'].forEach(k=>{
+    const v=+document.getElementById('pss-'+k).value;
+    psA[k]=v; document.getElementById('psv-'+k).textContent=v;
+  });
+  document.querySelectorAll('.ps-psbtn').forEach(b=>b.classList.remove('on'));
+  psSchedRender();
+}
+
+function psReset(doRender=true){
+  ['brt','ctr','sat','wrm','shp','hi','sh'].forEach(k=>{
+    document.getElementById('pss-'+k).value=0;
+    psA[k]=0; document.getElementById('psv-'+k).textContent=0;
+  });
+  document.querySelectorAll('.ps-psbtn').forEach(b=>b.classList.remove('on'));
+  if(doRender)psSchedRender();
+}
+
+const PS_PRESETS={
+  auto:[12,22,18,6,32,-18,22], studio:[8,28,8,0,45,-22,18],
+  warm:[5,14,22,45,25,-8,12],  vivid:[10,32,55,8,38,-12,28]
+};
+
+function psPreset(name,btn){
+  document.querySelectorAll('.ps-psbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const p=PS_PRESETS[name]||[0,0,0,0,0,0,0];
+  const keys=['brt','ctr','sat','wrm','shp','hi','sh'];
+  keys.forEach((k,i)=>{document.getElementById('pss-'+k).value=p[i]||0;psA[k]=p[i]||0;document.getElementById('psv-'+k).textContent=p[i]||0;});
+  psSchedRender();
+}
+
+function psSchedRender(){if(psRaf)cancelAnimationFrame(psRaf);psRaf=requestAnimationFrame(psRender);}
+
+function psRender(){
+  if(!psImg)return;
+  const canvas=document.getElementById('ps-canvas');
+  const wrap=canvas.parentElement;
+  const wW=wrap.clientWidth||300,wH=wrap.clientHeight||300;
+  const scale=Math.min(wW/psW,wH/psH);
+  const dW=Math.round(psW*scale),dH=Math.round(psH*scale);
+  canvas.width=dW; canvas.height=dH;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  if(psMask){
+    // Draw background (checkerboard for "original/transparent" so user sees erased areas)
+    if(psBg==='orig'){ctx.fillStyle='#2a2a2a';ctx.fillRect(0,0,dW,dH);const sz=14;for(let y=0;y<dH;y+=sz)for(let x=0;x<dW;x+=sz)if((Math.floor(x/sz)+Math.floor(y/sz))%2===0){ctx.fillStyle='#3d3d3d';ctx.fillRect(x,y,sz,sz);}ctx.fillStyle='#2a2a2a';}
+    else{psDrawBg(ctx,psBg,psBgClr,dW,dH);}
+    const tc=document.createElement('canvas');tc.width=psW;tc.height=psH;
+    tc.getContext('2d').putImageData(psMask,0,0);
+    ctx.drawImage(tc,0,0,psW,psH,0,0,dW,dH);
+  }else{ctx.drawImage(psImg,0,0,psW,psH,0,0,dW,dH);}
+  if(psA.brt||psA.ctr||psA.sat||psA.wrm||psA.shp||psA.hi||psA.sh){
+    const id=ctx.getImageData(0,0,dW,dH);
+    if(psA.shp>0)psSharpen(id.data,dW,dH,psA.shp/100);
+    psApplyColor(id.data);
+    ctx.putImageData(id,0,0);
+  }
+}
+
+function psDrawBg(ctx,key,color,w,h){
+  if(key==='orig')return;
+  if(key==='grad'){const g=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.hypot(w,h)*0.6);g.addColorStop(0,'#fff');g.addColorStop(1,'#d0d0d0');ctx.fillStyle=g;}
+  else{const m={white:'#ffffff',light:'#f2f2f2',gray:'#b0b0b0',dark:'#1a1a1a',custom:color};ctx.fillStyle=m[key]||'#fff';}
+  ctx.fillRect(0,0,w,h);
+}
+
+function psApplyColor(d){
+  const brt=psA.brt/100,ctr=psA.ctr/100,sat=psA.sat/100,wrm=psA.wrm/100,hi=psA.hi/100,sh=psA.sh/100;
+  for(let i=0;i<d.length;i+=4){
+    if(d[i+3]===0)continue;
+    let r=d[i],g=d[i+1],b=d[i+2];
+    r=psC(r+wrm*38);g=psC(g+wrm*8);b=psC(b-wrm*28);
+    r=psC(r+brt*75);g=psC(g+brt*75);b=psC(b+brt*75);
+    const lum=0.299*r+0.587*g+0.114*b;
+    if(hi&&lum>127){const t=((lum-127)/128)*hi*55;r=psC(r+t);g=psC(g+t);b=psC(b+t);}
+    if(sh&&lum<128){const t=((128-lum)/128)*sh*55;r=psC(r+t);g=psC(g+t);b=psC(b+t);}
+    if(ctr){const f=1+ctr*1.6;r=psC((r/255-.5)*f*255+127.5);g=psC((g/255-.5)*f*255+127.5);b=psC((b/255-.5)*f*255+127.5);}
+    if(sat){const gl=0.299*r+0.587*g+0.114*b;const f=1+sat*1.5;r=psC(gl+(r-gl)*f);g=psC(gl+(g-gl)*f);b=psC(gl+(b-gl)*f);}
+    d[i]=r;d[i+1]=g;d[i+2]=b;
+  }
+}
+
+function psSharpen(d,W,H,amt){
+  const o=new Uint8ClampedArray(d);
+  for(let y=1;y<H-1;y++){for(let x=1;x<W-1;x++){const i=(y*W+x)*4;if(d[i+3]===0)continue;for(let c=0;c<3;c++){const v=o[i+c];d[i+c]=psC(v+amt*(v*4-o[((y-1)*W+x)*4+c]-o[((y+1)*W+x)*4+c]-o[(y*W+x-1)*4+c]-o[(y*W+x+1)*4+c])*0.4);}}}
+}
+
+function psC(v){return v<0?0:v>255?255:v;}
+
+function applyPsPhoto(){
+  if(!psImg)return;
+  const fc=document.createElement('canvas');fc.width=psW;fc.height=psH;
+  const ctx=fc.getContext('2d',{willReadFrequently:true});
+  // For export: if bg is 'orig' and mask exists → white bg (can't export transparent as JPEG)
+  const exportBg=psMask&&psBg==='orig'?'white':psBg;
+  psDrawBg(ctx,exportBg,psBgClr,psW,psH);
+  if(psMask){
+    const tc=document.createElement('canvas');tc.width=psW;tc.height=psH;
+    tc.getContext('2d').putImageData(psMask,0,0);
+    ctx.drawImage(tc,0,0);
+  }else{ctx.drawImage(psImg,0,0);}
+  if(psA.brt||psA.ctr||psA.sat||psA.wrm||psA.shp||psA.hi||psA.sh){
+    const id=ctx.getImageData(0,0,psW,psH);
+    if(psA.shp>0)psSharpen(id.data,psW,psH,psA.shp/100);
+    psApplyColor(id.data);
+    ctx.putImageData(id,0,0);
+  }
+  productPhotos[psIdx]=fc.toDataURL('image/jpeg',0.92);
+  renderThumbs(); closePsModal(); toast('✅ Photo updated!');
+}
+
+function psShowLoading(txt){document.getElementById('ps-loading-txt').textContent=txt;document.getElementById('ps-loading').style.display='flex';}
+function psHideLoading(){document.getElementById('ps-loading').style.display='none';}
+
+// ── Manual tools ─────────────────────────────────────
+function psMaskInit(){
+  if(psMask)return;
+  const c=document.createElement('canvas');c.width=psW;c.height=psH;
+  const ctx=c.getContext('2d');ctx.drawImage(psImg,0,0,psW,psH);
+  psMask=ctx.getImageData(0,0,psW,psH);
+}
+
+function psSetTool(tool){
+  if(psCurTool===tool){
+    // toggle off
+    psCurTool='none';
+    document.getElementById('ps-tool-wand').classList.remove('on');
+    document.getElementById('ps-tool-brush').classList.remove('on');
+    document.getElementById('ps-brush-row').style.display='none';
+    document.getElementById('ps-hint').style.display='none';
+    document.getElementById('ps-canvas').style.cursor='default';
+    return;
+  }
+  psCurTool=tool;
+  document.getElementById('ps-tool-wand').classList.toggle('on',tool==='wand');
+  document.getElementById('ps-tool-brush').classList.toggle('on',tool==='brush');
+  document.getElementById('ps-brush-row').style.display=tool==='brush'?'block':'none';
+  const hint=document.getElementById('ps-hint');
+  const hintTxt=document.getElementById('ps-hint-txt');
+  hint.style.display='block';
+  if(tool==='wand'){hintTxt.textContent='👆 Tap on background to erase it';document.getElementById('ps-canvas').style.cursor='crosshair';}
+  else{hintTxt.textContent='🖌️ Paint over background to erase';document.getElementById('ps-canvas').style.cursor='cell';}
+  psMaskInit(); // initialize mask from original photo
+}
+
+function psRestoreAll(){
+  psMask=null; psCurTool='none';
+  document.getElementById('ps-tool-wand').classList.remove('on');
+  document.getElementById('ps-tool-brush').classList.remove('on');
+  document.getElementById('ps-brush-row').style.display='none';
+  document.getElementById('ps-hint').style.display='none';
+  document.getElementById('ps-canvas').style.cursor='default';
+  psRender(); toast('↩️ Restored original photo');
+}
+
+function psScreenToImg(clientX,clientY){
+  const canvas=document.getElementById('ps-canvas');
+  const rect=canvas.getBoundingClientRect();
+  return{
+    x:Math.max(0,Math.min(psW-1,Math.round((clientX-rect.left)*psW/canvas.width))),
+    y:Math.max(0,Math.min(psH-1,Math.round((clientY-rect.top)*psH/canvas.height)))
+  };
+}
+
+function psBrushErase(imgX,imgY){
+  if(!psMask)psMaskInit();
+  const px=psMask.data;const W=psW,H=psH;
+  const r=Math.round(psBrushSz/2);const r2=r*r;
+  for(let dy=-r;dy<=r;dy++){for(let dx=-r;dx<=r;dx++){
+    if(dx*dx+dy*dy>r2)continue;
+    const x=imgX+dx,y=imgY+dy;
+    if(x<0||x>=W||y<0||y>=H)continue;
+    px[(y*W+x)*4+3]=0;
+  }}
+}
+
+function psWandErase(imgX,imgY){
+  if(!psMask)psMaskInit();
+  const px=psMask.data;const W=psW,H=psH;
+  const pos=imgY*W+imgX;const i=pos*4;
+  if(px[i+3]===0)return; // already erased
+  const sR=px[i],sG=px[i+1],sB=px[i+2];
+  const T=55;
+  const visited=new Uint8Array(W*H);const stack=[];
+  function bgLike(p){const pi=p*4;if(px[pi+3]===0)return true;const dr=px[pi]-sR,dg=px[pi+1]-sG,db=px[pi+2]-sB;return dr*dr+dg*dg+db*db<T*T;}
+  function push(x,y){if(x<0||x>=W||y<0||y>=H)return;const p=y*W+x;if(visited[p])return;visited[p]=1;if(!bgLike(p))return;stack.push(p);}
+  push(imgX,imgY);
+  psShowLoading('Erasing area…');
+  function chunk(){
+    let done=0;
+    while(stack.length&&done<60000){const p=stack.pop();px[p*4+3]=0;const x=p%W,y=(p/W)|0;push(x-1,y);push(x+1,y);push(x,y-1);push(x,y+1);done++;}
+    if(stack.length){setTimeout(chunk,0);}else{psHideLoading();psRender();}
+  }
+  chunk();
+}
+
+function psSetupEvents(){
+  const canvas=document.getElementById('ps-canvas');
+  canvas.addEventListener('pointerdown',(e)=>{
+    if(psCurTool==='none')return;
+    e.preventDefault();psPointerDown=true;
+    const{x,y}=psScreenToImg(e.clientX,e.clientY);
+    if(psCurTool==='wand')psWandErase(x,y);
+    else if(psCurTool==='brush'){psBrushErase(x,y);psSchedRender();}
+  },{passive:false});
+  canvas.addEventListener('pointermove',(e)=>{
+    if(!psPointerDown||psCurTool!=='brush')return;
+    e.preventDefault();
+    const{x,y}=psScreenToImg(e.clientX,e.clientY);
+    psBrushErase(x,y);psSchedRender();
+  },{passive:false});
+  canvas.addEventListener('pointerup',()=>{psPointerDown=false;});
+  canvas.addEventListener('pointercancel',()=>{psPointerDown=false;});
+}
+
+// ── HuggingFace RMBG-1.4 (free AI removal) ──────────
+async function psHFRemoveBg(){
+  const hfKey=document.getElementById('ps-hf-key').value.trim();
+  if(!hfKey){toast('Paste your HuggingFace token (hf_...)');return;}
+  saveData('hf_key',hfKey);
+  psShowLoading('🤖 AI removing background…');
+  try{
+    const c=document.createElement('canvas');c.width=psW;c.height=psH;
+    c.getContext('2d').drawImage(psImg,0,0,psW,psH);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.92));
+    const res=await fetch('https://api-inference.huggingface.co/models/briaai/RMBG-1.4',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+hfKey,'Content-Type':'application/octet-stream'},
+      body:blob
+    });
+    if(!res.ok)throw new Error('API error '+res.status+' — check your token');
+    const resultBlob=await res.blob();
+    const url=URL.createObjectURL(resultBlob);
+    const img=new Image();
+    img.onload=()=>{
+      const c2=document.createElement('canvas');c2.width=psW;c2.height=psH;
+      const ctx2=c2.getContext('2d',{willReadFrequently:true});
+      ctx2.drawImage(img,0,0,psW,psH);
+      psMask=ctx2.getImageData(0,0,psW,psH);
+      URL.revokeObjectURL(url);
+      if(psBg==='orig'){psBg='white';psActiveBg('white');}
+      psHideLoading();psRender();
+      toast('✅ AI background removed!');
+    };
+    img.src=url;
+  }catch(e){psHideLoading();toast('❌ '+(e.message||'Failed'));}
 }
 
 function submitProduct(){
